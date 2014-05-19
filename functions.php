@@ -27,49 +27,49 @@ abstract class MTType
 
 function mt_is_archive( $mt_type = null )
 {
-	if( $mt_type == null ) $mt_type = MultiTags_Main::$page_type;
+	if( $mt_type == null ) $mt_type = MultiTaxonomyBrowser::$page_type;
 	return ( ($mt_type == MTType::FilteredArchive) || ($mt_type == MTType::CombinedArchive) );
 }
 
 function mt_is_search( $mt_type = null )
 {
-	if( $mt_type == null ) $mt_type = MultiTags_Main::$page_type;
+	if( $mt_type == null ) $mt_type = MultiTaxonomyBrowser::$page_type;
 	return ( ($mt_type == MTType::FilteredSearch) || ($mt_type == MTType::CombinedSearch) );
 }
 
 function mt_is_filtered( $mt_type = null )
 {
-	if( $mt_type == null ) $mt_type = MultiTags_Main::$page_type;
+	if( $mt_type == null ) $mt_type = MultiTaxonomyBrowser::$page_type;
 	return ( ($mt_type == MTType::FilteredArchive) || ($mt_type == MTType::FilteredSearch) );
 }
 
 function mt_is_combined( $mt_type = null )
 {
-	if( $mt_type == null ) $mt_type = MultiTags_Main::$page_type;
+	if( $mt_type == null ) $mt_type = MultiTaxonomyBrowser::$page_type;
 	return ( ($mt_type == MTType::CombinedArchive) || ($mt_type == MTType::CombinedSearch) );
 }
 
 function mt_is_filtered_archive( $mt_type = null )
 {
-	if( $mt_type == null ) $mt_type = MultiTags_Main::$page_type;
+	if( $mt_type == null ) $mt_type = MultiTaxonomyBrowser::$page_type;
 	return $mt_type == MTType::FilteredArchive;
 }
 
 function mt_is_combined_archive( $mt_type = null )
 {
-	if( $mt_type == null ) $mt_type = MultiTags_Main::$page_type;
+	if( $mt_type == null ) $mt_type = MultiTaxonomyBrowser::$page_type;
 	return $mt_type == MTType::CombinedArchive;
 }
 
 function mt_is_filtered_search( $mt_type = null )
 {
-	if( $mt_type == null ) $mt_type = MultiTags_Main::$page_type;
+	if( $mt_type == null ) $mt_type = MultiTaxonomyBrowser::$page_type;
 	return $mt_type == MTType::FilteredSearch;
 }
 
 function mt_is_combined_search( $mt_type = null )
 {
-	if( $mt_type == null ) $mt_type = MultiTags_Main::$page_type;
+	if( $mt_type == null ) $mt_type = MultiTaxonomyBrowser::$page_type;
 	return $mt_type == MTType::CombinedSearch;
 }
 
@@ -104,8 +104,8 @@ function mt_get_current_filter_data()
 		
 		if( mt_is_archive() || mt_is_search() )
 		{
-			$mt_post_types = MultiTags_Api::GetPostTypes();
-			$mt_taxonomies = MultiTags_Api::GetTaxonomies();
+			$mt_post_types = MultiTaxonomyBrowser_Api::GetPostTypes();
+			$mt_taxonomies = MultiTaxonomyBrowser_Api::GetTaxonomies();
 			
 			$data['post-types'] = array_merge( $mt_post_types, $data['post-types'] );
 			foreach( $mt_taxonomies as $taxname => $terms )
@@ -166,7 +166,7 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $current )
 					'taxonomy' => $taxname,
 					'field' => 'slug',
 					'terms' => $terms,
-					'operator' => ( $relation == 'AND' ? $relation : 'OR' ),
+					'operator' => ( $relation == 'AND' ? $relation : 'IN' ),
 				)
 			);
 		}
@@ -357,7 +357,7 @@ function mt_get_url( $mt_type, $post_types, $taxonomies,
 	foreach( $current_taxonomies as $taxname => $terms )
 	{
 		$t = $terms;
-		if( array_key_exists($taxname, $new_taxonomies) )
+		if( ($new_taxonomies !== null) && (array_key_exists($taxname, $new_taxonomies)) )
 		{
 			if( !$remove_new_taxonomies ) $t = array_merge( $t, $new_taxonomies[$taxname] );
 			else $t = array_diff( $t, $new_taxonomies[$taxname] );
@@ -396,7 +396,6 @@ function mt_create_interface( $mt_type, $post_types, $taxonomies )
 {
 	$current_filtered_data = mt_get_current_filter_data();
 	
-	
 	if( !mt_is_archive() && !mt_is_search() )
 	{
 		$current_filtered_data['post-types'] = $post_types;
@@ -406,7 +405,6 @@ function mt_create_interface( $mt_type, $post_types, $taxonomies )
 				$current_filtered_data['taxonomies'][$taxname] = array();
 		}
 	}	
-	
 	
 	mt_print_interface( $mt_type, $post_types, $taxonomies, $current_filtered_data );
 }

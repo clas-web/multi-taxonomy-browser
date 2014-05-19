@@ -1,6 +1,6 @@
 <?php
 /*
-Plugin Name: Multiple Taxonomy Archives
+Plugin Name: Multi-Taxonomy Browser
 Plugin URI: 
 Description: 
 Version: 0.1.0
@@ -28,13 +28,19 @@ require_once( dirname(__FILE__).'/filter-widget.php' );
 
 
 
-add_filter( 'query_vars', array('MultiTags_Main', 'query_vars') );
-add_action( 'parse_request', array('MultiTags_Main', 'parse_request') );
+add_filter( 'query_vars', array('MultiTaxonomyBrowser', 'query_vars') );
+add_action( 'parse_request', array('MultiTaxonomyBrowser', 'parse_request') );
+
+add_filter( 'the_content', array('MultiTaxonomyBrowser', 'process_content') );
+
+foreach( array('archive','taxonomy','category','tag') as $archive )
+	add_filter( $archive.'_template',  array('MultiTaxonomyBrowser', 'get_archive_template_file') );
+add_filter( 'search_template',  array('MultiTaxonomyBrowser', 'get_search_template_file') );
 
 
 
 
-class MultiTags_Main
+class MultiTaxonomyBrowser
 {
 	
 	public static $page_type = MTType::None;
@@ -67,90 +73,146 @@ class MultiTags_Main
 		if( array_key_exists(MT_COMBINED_ARCHIVE, $wp->query_vars) )
 		{
 			self::$page_type = MTType::CombinedArchive;
-			MultiTags_Api::ProcessCombinedArchive();
-			add_action( 'pre_get_posts', array('MultiTags_Api', 'alter_wp_query') );
+			MultiTaxonomyBrowser_Api::ProcessCombinedArchive();
+			add_action( 'pre_get_posts', array('MultiTaxonomyBrowser_Api', 'alter_wp_query') );
 		}
 		elseif( array_key_exists(MT_FILTERED_ARCHIVE, $wp->query_vars) )
 		{
 			self::$page_type = MTType::FilteredArchive;
-			MultiTags_Api::ProcessFilteredArchive();
-			add_action( 'pre_get_posts', array('MultiTags_Api', 'alter_wp_query') );
+			MultiTaxonomyBrowser_Api::ProcessFilteredArchive();
+			add_action( 'pre_get_posts', array('MultiTaxonomyBrowser_Api', 'alter_wp_query') );
 		}
 
 		if( array_key_exists(MT_COMBINED_SEARCH, $wp->query_vars) )
 		{
 			self::$page_type = MTType::CombinedSearch;
-			MultiTags_Api::ProcessCombinedSearch();
-			add_action( 'pre_get_posts', array('MultiTags_Api', 'alter_wp_query') );
+			MultiTaxonomyBrowser_Api::ProcessCombinedSearch();
+			add_action( 'pre_get_posts', array('MultiTaxonomyBrowser_Api', 'alter_wp_query') );
 		}
 		elseif( array_key_exists(MT_FILTERED_SEARCH, $wp->query_vars) )
 		{
 			self::$page_type = MTType::FilteredSearch;
-			MultiTags_Api::ProcessFilteredSearch();
-			add_action( 'pre_get_posts', array('MultiTags_Api', 'alter_wp_query') );
+			MultiTaxonomyBrowser_Api::ProcessFilteredSearch();
+			add_action( 'pre_get_posts', array('MultiTaxonomyBrowser_Api', 'alter_wp_query') );
 		}
 	}
 	
 	
 	
-	public static function get_current_filter_data()
+	public static function process_content( $content )
 	{
-		$data = array(
-			'post-types' => array(),
-			'taxonomies' => array(),
-		);
-		
-		if( !is_archive() && !mt_is_archive() && !is_search() ) return $data;
-		
-		//----------------------------------------
-		
-		$qo = get_queried_object();
-		if( $qo != null )
+		$matches = NULL;
+		$num_matches = preg_match_all("/\[mt-link(.+)\]/", $content, $matches, PREG_SET_ORDER);
+
+		if( ($num_matches !== FALSE) && ($num_matches > 0) )
 		{
-			if( is_category() || is_tag() || is_tax() )
+			for( $i = 0; $i < $num_matches; $i++ )
 			{
-				$data['taxonomies'][$qo->taxonomy] = array( $qo->slug );
-			}
-			
-// 			print_r($qo);
-		}
-		
-		//----------------------------------------
-		
-		if( mt_is_archive() )
-		{
-			$mt_post_types = MultiTags_Api::GetPostTypes();
-			$mt_taxonomies = MultiTags_Api::GetTaxonomies();
-			
-// 			mt_print( $mt_post_types, 'MT Post Types' );
-// 			mt_print( $mt_taxonomies, 'MT Taxonomies' );
-			
-			$data['post-types'] = array_merge( $mt_post_types, $data['post-types'] );
-			foreach( $mt_taxonomies as $taxname => $terms )
-			{
-				if( array_key_exists( $taxname, $data['taxonomies'] ) )
-					$data['taxonomies'][$taxname] = array_merge(
-						$mt_taxonomies[$taxname],
-						$data['taxonomies'][$taxname]
-					);
-				else
-					$data['taxonomies'][$taxname] = $mt_taxonomies[$taxname];
+				$content = str_replace($matches[$i][0], self::get_shortcode_link( $matches[$i][0] ), $content);
 			}
 		}
 		
-		foreach( $data['taxonomies'] as $taxname => &$terms )
+		return $content;
+	}
+	
+	
+	/*
+	[mt-link type="mt-filtered-archive"
+	         post-type="post,connection"
+	         taxonomies="category,post_tag"
+	         category="category1,category3"
+	         post_tag="tag1,tag3"
+	*/
+	
+	public static function get_shortcode_link( $shortcode )
+	{
+		$mt_type = MT_FILTERED_ARCHIVE;
+		$post_types = array( 'post' );
+		$taxnames = array();
+		$taxonomies = array();
+
+		$matches = NULL;
+		if( preg_match("/type=\"([^\"]+)\"/", $shortcode, $matches) )
+			$mt_type = trim($matches[1]);
+			
+		$matches = NULL;
+		if( preg_match("/post-types=\"([^\"]+)\"/", $shortcode, $matches) )
+			$post_types = explode( ',', trim($matches[1]) );
+
+		$matches = NULL;
+		if( preg_match("/taxonomies=\"([^\"]+)\"/", $shortcode, $matches) )
+			$taxnames = explode( ',', trim($matches[1]) );
+		
+		foreach( $taxnames as $taxname )
 		{
-			$terms = array_unique($terms);
+			$matches = NULL;
+			if( preg_match("/".$taxname."=\"([^\"]+)\"/", $shortcode, $matches) )
+				$taxonomies[$taxname] = explode( ',', trim($matches[1]) );
+			else
+				$taxonomies[$taxname] = array();
 		}
 		
-		//----------------------------------------
+		$url = get_home_url().'/?'.$mt_type.'&post-types='.implode(',',$post_types);
+		foreach( $taxonomies as $taxname => $terms )
+		{
+			$url .= '&'.$taxname.'='.implode(',',$terms);
+		}
 		
-// 		mt_print( $data, 'Current Filter Data' );
-		return $data;
+		return $url;
 	}
 	
 	
 	
+	public static function get_archive_template_file( $template )
+	{
+		if( !mt_is_archive() ) return $template;
+	
+		$template_filenames = array();
+	
+		if( mt_is_filtered() )
+			array_push( $template_filenames, 'mt-filtered-archive' );
+		else if( mt_is_combined() )
+			array_push( $template_filenames, 'mt-combined-archive' );
+	
+		array_push( $template_filenames, 'mt-archive' );
+	
+		return self::find_template_file( $template_filenames, $template );
+	}
+	
+	public static function get_search_template_file( $template )
+	{
+		if( !mt_is_search() ) return $template;
+	
+		$template_filenames = array();
+	
+		if( mt_is_filtered() )
+			array_push( $template_filenames, 'mt-filtered-search' );
+		else if( mt_is_combined() )
+			array_push( $template_filenames, 'mt-combined-search' );
+	
+		array_push( $template_filenames, 'mt-search' );
+	
+		return self::find_template_file( $template_filenames, $template );	
+	}
+	
+	
+	private static function find_template_file( $template_filenames, $template )
+	{
+		foreach( $template_filenames as $filename )
+		{
+			if( file_exists( get_stylesheet_directory().'/'.$filename.'.php' ) )
+			{
+				$template = get_stylesheet_directory().'/'.$filename.'.php';
+				break;
+			}
+			if( file_exists( get_template_directory().'/'.$filename.'.php' ) )
+			{
+				$template = get_template_directory().'/'.$filename.'.php';
+				break;
+			}
+		}
+		return $template;
+	}
 }
 
 

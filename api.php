@@ -1,7 +1,7 @@
 <?php
 
 
-class MultiTags_Api
+class MultiTaxonomyBrowser_Api
 {
 	private static $initialized = false;
 	private static $post_type;
