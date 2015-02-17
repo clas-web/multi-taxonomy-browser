@@ -130,6 +130,7 @@ class MultiTaxonomyBrowser_Api
 							'field' => 'slug',
 							'terms' => $terms,
 							'operator' => ( self::$relation === 'AND' ? 'AND' : 'IN' ),
+							'include_children' => false,
 						)
 					);
 				
@@ -155,8 +156,8 @@ class MultiTaxonomyBrowser_Api
 			$query->is_home = false;
 		}
 		
-// 		mt_print( self::$taxonomies, 'MT Taxs' );
-// 		mt_print( $query, 'Query' );
+//  		mt_print( self::$taxonomies, 'MT Taxs' );
+//  		mt_print( $query, 'Query' );
 
 		return $query;
 	}
