@@ -39,7 +39,6 @@ add_filter( 'search_template',  array('MultiTaxonomyBrowser', 'get_search_templa
 
 
 
-
 class MultiTaxonomyBrowser
 {
 	
@@ -74,25 +73,26 @@ class MultiTaxonomyBrowser
 		{
 			self::$page_type = MTType::CombinedArchive;
 			MultiTaxonomyBrowser_Api::ProcessCombinedArchive();
-			add_action( 'pre_get_posts', array('MultiTaxonomyBrowser_Api', 'alter_wp_query') );
 		}
 		elseif( array_key_exists(MT_FILTERED_ARCHIVE, $wp->query_vars) )
 		{
 			self::$page_type = MTType::FilteredArchive;
 			MultiTaxonomyBrowser_Api::ProcessFilteredArchive();
-			add_action( 'pre_get_posts', array('MultiTaxonomyBrowser_Api', 'alter_wp_query') );
 		}
 
 		if( array_key_exists(MT_COMBINED_SEARCH, $wp->query_vars) )
 		{
 			self::$page_type = MTType::CombinedSearch;
 			MultiTaxonomyBrowser_Api::ProcessCombinedSearch();
-			add_action( 'pre_get_posts', array('MultiTaxonomyBrowser_Api', 'alter_wp_query') );
 		}
 		elseif( array_key_exists(MT_FILTERED_SEARCH, $wp->query_vars) )
 		{
 			self::$page_type = MTType::FilteredSearch;
 			MultiTaxonomyBrowser_Api::ProcessFilteredSearch();
+		}
+		
+		if( mt_is_archive() || mt_is_search() )
+		{
 			add_action( 'pre_get_posts', array('MultiTaxonomyBrowser_Api', 'alter_wp_query') );
 		}
 	}
