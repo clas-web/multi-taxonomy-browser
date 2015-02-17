@@ -94,10 +94,26 @@ class MultiTaxonomyBrowser
 		if( mt_is_archive() || mt_is_search() )
 		{
 			add_action( 'pre_get_posts', array('MultiTaxonomyBrowser_Api', 'alter_wp_query') );
+			add_filter( 'body_class', array('MultiTaxonomyBrowser', 'alter_body_class') );
 		}
 	}
 	
 	
+	
+	public static function alter_body_class( $classes )
+	{
+		if( mt_is_archive() )
+		{
+			$classes[] = 'mt-archive';
+		}
+		
+		if( mt_is_search() )
+		{
+			$classes[] = 'mt-search';
+		}
+		
+		return $classes;
+	}
 	
 	public static function process_content( $content )
 	{
