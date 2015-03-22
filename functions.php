@@ -235,7 +235,22 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $current )
 		$tax = get_taxonomy($taxname);
 		if( $tax )
 		{
-			$labels[$taxname] = $tax->labels->name;
+			if( $tax->labels->name == "Categories" ) 
+			{
+				$taxonomy_label = get_option('category_base');
+				if( !$taxonomy_label ) $taxonomy_label = $tax->labels->name;
+			}
+			else if( $tax->labels->name == "Tags" ) 
+			{
+				$taxonomy_label = get_option('tag_base');
+				if( !$taxonomy_label ) $taxonomy_label = $tax->labels->name;		
+			}
+			else
+			{
+				$taxonomy_label = $tax->labels->name;
+			}
+		
+			$labels[$taxname] = $taxonomy_label;
 		}
 	}
 	
