@@ -329,7 +329,7 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $current )
 				);
 				
 				$t = get_term_by( 'slug', $term, $taxname ); 
-				echo '<a href="'.$link.'">'.$t->name.'</a>';
+				echo '<a href="'.$link.'" class='.$t->slug.'>'.$t->name.'</a>';
 			}
 			
 		}
