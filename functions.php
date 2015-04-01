@@ -144,7 +144,7 @@ function mt_get_current_filter_data()
 /**
  * 
  **/
-function mt_print_interface( $mt_type, $post_types, $taxonomies, $current )
+function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level, $current )
 {
 	$relation = 'AND'; if( mt_is_combined($mt_type) ) $relation = 'OR';
 	
@@ -160,30 +160,15 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $current )
 		$query_args['post_type'] = $post_types;
 	}
 	
-	$count = 0;
-	$query_args['tax_query'] = array();
-	foreach( $current['taxonomies'] as $taxname => $terms )
-	{
-		if( count($terms) > 0 )
-		{
-			$count++;
-			array_push(
-				$query_args['tax_query'],
-				array(
-					'taxonomy' => $taxname,
-					'field' => 'slug',
-					'terms' => $terms,
-					'operator' => ( $relation == 'AND' ? $relation : 'IN' ),
-				)
-			);
-		}
-	}
-	if( $count > 1 )
-	{
-		$query_args['tax_query']['relation'] = $relation;
-	}
+	//
+	// Three options:
+	// 0 - Only include related that match posts.
+	// 1 - Only include posts from one level down (children of taxonomies).
+	// 2 - Match all children posts
+	//
 	
-	$query = new WP_Query( $query_args );
+	$query_args['tax_query'] = mt_get_tax_query( $current['taxonomies'], $relation, $related_level );
+// 	mt_print( $query_args['tax_query'] );
 	
 	
 	// 
@@ -195,7 +180,6 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $current )
 	{
 		$matching_taxonomies[$taxonomy] = array();
 	}
-
 	
 	global $post;
 	while( $query->have_posts() )
@@ -228,8 +212,7 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $current )
 	foreach( $current['taxonomies'] as $taxname => &$terms )
 	{
 		asort( $terms );
-	}
-	
+	}	
 	
 	// 
 	// Get taxonomy labels.
@@ -285,6 +268,7 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $current )
 					$mt_type,
 					$post_types,
 					$taxonomies,
+					$related_level,
 					$current['taxonomies'],
 					array( $taxname => array( $term ) ),
 					true
@@ -330,6 +314,7 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $current )
 					$mt_type,
 					$post_types,
 					$taxonomies,
+					$related_level,
 					$current['taxonomies'],
 					array( $taxname => array( $term ) ),
 					false
@@ -358,7 +343,7 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $current )
 /**
  * 
  **/
-function mt_get_url( $mt_type, $post_types, $taxonomies, 
+function mt_get_url( $mt_type, $post_types, $taxonomies, $related_level,
                                $current_taxonomies, $new_taxonomies = null, 
                                $remove_new_taxonomies = false )
 {
@@ -404,6 +389,11 @@ function mt_get_url( $mt_type, $post_types, $taxonomies,
 		}
 	}
 	
+	if( $related_level > 0 )
+	{
+		$url .= '&rl='.$related_level;
+	}
+	
 	return $url;
 }
 
@@ -414,7 +404,7 @@ function mt_get_url( $mt_type, $post_types, $taxonomies,
 /**
  * 
  **/
-function mt_create_interface( $mt_type, $post_types, $taxonomies )
+function mt_create_interface( $mt_type, $post_types, $taxonomies, $related_level )
 {
 	$current_filtered_data = mt_get_current_filter_data();
 	
@@ -428,7 +418,108 @@ function mt_create_interface( $mt_type, $post_types, $taxonomies )
 		}
 	}	
 	
-	mt_print_interface( $mt_type, $post_types, $taxonomies, $current_filtered_data );
+	mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level, $current_filtered_data );
+}
+
+
+
+function mt_get_tax_query( $taxonomies, $relation, $related_level = 2 )
+{
+// 	mt_print( $taxonomies, $relation.' : '.$related_level );	
+	if( count($taxonomies) === 0 ) return null;
+	
+	$query_taxonomies = array();
+	foreach( $taxonomies as $taxname => $terms )
+	{
+		if( count($terms) === 0 ) continue;
+		
+		if( $related_level === 0 || !is_taxonomy_hierarchical($taxname) )
+		{
+			$query_taxonomies[$taxname] = $terms;
+			continue;
+		}
+		
+		$query_taxonomies[$taxname] = array();
+		
+		foreach( $terms as $term )
+		{
+			$t = get_term_by( 'slug', $term, $taxname );
+			$children_args = array(
+				'taxonomy'	=> $taxname,
+				'child_of'	=> $t->term_id,
+			);
+			
+			if( $related_level === 1 )
+			{
+				$children_args['parent'] = $t->term_id;
+			}
+			
+			$all_terms = array_merge(
+				array( $t ),
+				get_categories( $children_args )
+			);
+			
+			$all_terms = array_map(
+				function( $t ) { return $t->term_id; },
+				$all_terms
+			);
+			
+			$query_taxonomies[$taxname][] = $all_terms;
+		}
+	}
+	
+// 	mt_print($query_taxonomies);
+// 	mt_print(count($query_taxonomies));
+	
+	if( count($query_taxonomies) === 0 ) return null;
+	
+	$count = 0;
+	$tax_query = array();
+	foreach( $query_taxonomies as $taxname => $terms )
+	{
+		if( count($terms) > 0 )
+		{
+			if( $related_level === 0 || !is_taxonomy_hierarchical($taxname) )
+			{
+				array_push(
+					$tax_query,
+					array(
+						'taxonomy'			=> $taxname,
+						'field'				=> 'slug',
+						'terms'				=> $terms,
+						'operator'			=> ( $relation === 'AND' ? 'AND' : 'IN' ),
+						'include_children'	=> false,
+					)
+				);
+
+				$count++;
+				continue;
+			}
+			
+			foreach( $terms as $term_list )
+			{
+				array_push(
+					$tax_query,
+					array(
+						'taxonomy' 			=> $taxname,
+						'field' 			=> 'id',
+						'terms' 			=> $term_list,
+						'operator' 			=> 'IN',
+						'include_children' 	=> false,
+					)
+				);
+
+				$count++;
+			}
+		}
+	}
+	if( $count > 1 )
+	{
+		$tax_query['relation'] = $relation;
+	}
+	
+// 	mt_print( $tax_query );	
+	return $tax_query;
 }
 
 

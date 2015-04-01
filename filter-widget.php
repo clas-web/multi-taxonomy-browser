@@ -108,7 +108,7 @@ class MultiTax_Filter_Widget extends WP_Widget
 		echo $args['before_widget'];
 		
 		echo $title;
-		mt_print_interface( MTType::FilteredArchive, $post_types, $taxonomies, $current_filtered_data );
+		mt_print_interface( MTType::FilteredArchive, $post_types, $taxonomies, $related_level, $current_filtered_data );
 		
 		echo $args['after_widget'];
 		
@@ -155,6 +155,17 @@ class MultiTax_Filter_Widget extends WP_Widget
 			<br/>
 		<?php endforeach; ?>
 		</p>
+		
+		<p>
+		<label for="<?php echo $this->get_field_id( 'related_level' ); ?>"><?php _e( 'Related Level:' ); ?></label>
+		<br/>
+		<input type="radio" name="<?php echo $this->get_field_name( 'related_level' ); ?>" value="0" <?php echo checked( $related_level, 0 ); ?> />
+		Include siblings<br/>
+		<input type="radio" name="<?php echo $this->get_field_name( 'related_level' ); ?>" value="1" <?php echo checked( $related_level, 1 ); ?> />
+		Include siblings and first descendents<br/>
+		<input type="radio" name="<?php echo $this->get_field_name( 'related_level' ); ?>" value="2" <?php echo checked( $related_level, 2 ); ?> />		
+		Include siblings and all descendents<br/>
+		</p>
 
 		<?php
 	}
@@ -193,10 +204,14 @@ class MultiTax_Filter_Widget extends WP_Widget
 		$options['exclude_taxonomies'] = array( 'nav_menu', 'link_category', 'post_format' );
 		$options['taxonomies'] = array('post_tag');
 		
+		$options['related_level'] = 0;
+		
 		foreach( $instance as $k => $v )
 		{
 			$options[$k] = $v;
 		}
+		
+		$options['related_level'] = intval( $options['related_level'] );
 		
 		return $options;
 	}

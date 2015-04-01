@@ -113,38 +113,9 @@ class MultiTaxonomyBrowser_Api
 		if( !self::$initialized ) return $query;
 		
 		$query->query_vars['post_type'] = self::$post_type;
-		
-		$count = 0;
-		$tax_query = array();
-		if( count(self::$taxonomies) > 0 )
-		{
-			foreach( self::$taxonomies as $taxname => $terms )
-			{
-				if( count($terms) > 0 )
-				{
-// 					mt_print($terms);
-					array_push(
-						$tax_query,
-						array(
-							'taxonomy' => $taxname,
-							'field' => 'slug',
-							'terms' => $terms,
-							'operator' => ( self::$relation === 'AND' ? 'AND' : 'IN' ),
-							'include_children' => false,
-						)
-					);
-				
-					$count++;
-				}
-			}
-			if( $count > 1 )
-			{
-				$tax_query['relation'] = self::$relation;
-			}
-			$query->query_vars['tax_query'] = $tax_query;
+		$query->query_vars['tax_query'] = mt_get_tax_query( self::$taxonomies, self::$relation, 2 );
 			
-// 			mt_print($query->query_vars['tax_query'], 'Tax_Query');
-		}
+// 		mt_print($query->query_vars['tax_query'], 'Tax_Query');
 		
 		if( self::$search )
 		{
@@ -156,8 +127,7 @@ class MultiTaxonomyBrowser_Api
 			$query->is_home = false;
 		}
 		
-//  		mt_print( self::$taxonomies, 'MT Taxs' );
-//  		mt_print( $query, 'Query' );
+//		mt_print( $query, 'Query' );
 
 		return $query;
 	}
