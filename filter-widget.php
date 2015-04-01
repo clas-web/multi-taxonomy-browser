@@ -49,7 +49,7 @@ class MultiTax_Filter_Widget extends WP_Widget
 		
 		if( mt_is_archive() || mt_is_search() )
 		{
-			if( count($post_types) != count($current_filtered_data['post-types']) )
+			if( count($post_types) != count($current_filtered_data['post_types']) )
 				$display_filter_widget = false;
 			if( count($taxonomies) != count($current_filtered_data['taxonomies']) )
 				$display_filter_widget = false;
@@ -58,7 +58,7 @@ class MultiTax_Filter_Widget extends WP_Widget
 			{
 				foreach( $post_types as $pt )
 				{
-					if( !in_array($pt, $current_filtered_data['post-types']) )
+					if( !in_array($pt, $current_filtered_data['post_types']) )
 					{
 						$display_filter_widget = false; break;
 					}
@@ -95,7 +95,7 @@ class MultiTax_Filter_Widget extends WP_Widget
 		
 		if( !mt_is_archive() && !mt_is_search() )
 		{
-			$current_filtered_data['post-types'] = $post_types;
+			$current_filtered_data['post_types'] = $post_types;
 			foreach( $taxonomies as $taxname )
 			{
 				if( !array_key_exists($taxname, $current_filtered_data['taxonomies']) )
@@ -135,11 +135,11 @@ class MultiTax_Filter_Widget extends WP_Widget
 		</p>
 		
 		<p>
-		<label for="<?php echo $this->get_field_id( 'post-type' ); ?>"><?php _e( 'Post Type:' ); ?></label> 
+		<label for="<?php echo $this->get_field_id( 'post_type' ); ?>"><?php _e( 'Post Type:' ); ?></label> 
 		<br/>
 		<?php foreach( $all_post_types as $pt ): ?>
 			<?php if( in_array($pt->name, $exclude_post_types) ) continue; ?>
-			<input type="checkbox" name="<?php echo $this->get_field_name( 'post-types' ); ?>[]" value="<?php echo esc_attr( $pt->name ); ?>" <?php echo ( in_array($pt->name, $post_types) ? 'checked' : '' ); ?> />
+			<input type="checkbox" name="<?php echo $this->get_field_name( 'post_types' ); ?>[]" value="<?php echo esc_attr( $pt->name ); ?>" <?php echo ( in_array($pt->name, $post_types) ? 'checked' : '' ); ?> />
 			<?php echo $pt->label; ?>
 			<br/>
 		<?php endforeach; ?>
@@ -195,7 +195,7 @@ class MultiTax_Filter_Widget extends WP_Widget
 		
 		foreach( $instance as $k => $v )
 		{
-			$options[ str_replace('-', '_', $k) ] = $v;
+			$options[$k] = $v;
 		}
 		
 		return $options;

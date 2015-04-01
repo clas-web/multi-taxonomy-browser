@@ -90,7 +90,7 @@ function mt_is_combined_search( $mt_type = null )
 function mt_get_current_filter_data()
 {
 		$data = array(
-			'post-types' => array(),
+			'post_types' => array(),
 			'taxonomies' => array(),
 		);
 		
@@ -114,7 +114,7 @@ function mt_get_current_filter_data()
 			$mt_post_types = MultiTaxonomyBrowser_Api::GetPostTypes();
 			$mt_taxonomies = MultiTaxonomyBrowser_Api::GetTaxonomies();
 			
-			$data['post-types'] = array_merge( $mt_post_types, $data['post-types'] );
+			$data['post_types'] = array_merge( $mt_post_types, $data['post_types'] );
 			foreach( $mt_taxonomies as $taxname => $terms )
 			{
 				if( array_key_exists( $taxname, $data['taxonomies'] ) )
@@ -420,7 +420,7 @@ function mt_create_interface( $mt_type, $post_types, $taxonomies )
 	
 	if( !mt_is_archive() && !mt_is_search() )
 	{
-		$current_filtered_data['post-types'] = $post_types;
+		$current_filtered_data['post_types'] = $post_types;
 		foreach( $taxonomies as $taxname )
 		{
 			if( !array_key_exists($taxname, $current_filtered_data['taxonomies']) )
