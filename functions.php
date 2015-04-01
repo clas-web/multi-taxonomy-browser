@@ -1,11 +1,18 @@
 <?php
 
 
-function mt_print( $text, $title = '' )
+function mt_print( $var, $label = null )
 {
 	echo '<pre>';
-	if( !empty($title) ) echo $title.":\n";
-	print_r($text);
+	
+	if( $label !== null )
+	{
+		$label = print_r( $label, true );
+		echo "<strong>$label:</strong><br/>";
+	}
+	
+	var_dump($var);
+	
 	echo '</pre>';
 }
 
