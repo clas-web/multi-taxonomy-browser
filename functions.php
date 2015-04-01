@@ -181,20 +181,22 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 		$matching_taxonomies[$taxonomy] = array();
 	}
 	
-	global $post;
-	while( $query->have_posts() )
+	$matching_query = new WP_Query( $query_args );
+	
+	while( $matching_query->have_posts() )
 	{
-		$query->the_post();
+		$post = $matching_query->the_post();
 		
 		foreach( $taxonomies as $taxname )
 		{
 			$matching_taxonomies[$taxname] = array_merge(
 				$matching_taxonomies[$taxname],
-				wp_get_post_terms( $post->ID, $taxname, array("fields" => "slugs") )
+				wp_get_post_terms( get_the_ID(), $taxname, array("fields" => "slugs") )
 			);
 		}
-	}	
+	}
 	
+	wp_reset_query();
 	
 	// 
 	// Sort taxonomy lists.
