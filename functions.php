@@ -1,6 +1,33 @@
 <?php
+/**
+ * The main functions for the Multi-Taxonomy Browser plugin.
+ * 
+ * @package    multi-taxonomy-browser
+ * @author     Crystal Barton <atrus1701@gmail.com>
+ */
 
 
+/**
+ * Struct for the type of the MultiTaxonomy Browser.
+ */
+if( !class_exists('MTType') ):
+abstract class MTType
+{
+	const None = -1;
+	const FilteredArchive = 0;
+	const CombinedArchive = 1;
+	const FilteredSearch = 2;
+	const CombinedSearch = 3;
+}
+endif;
+
+
+/**
+ * Print a variable in pretty, easy-to-read format.
+ * @param  mixed  $var  The variable to print.
+ * @param  string  $label  The label for the variable output.
+ */
+if( !function_exists('mt_print') ):
 function mt_print( $var, $label = null )
 {
 	echo '<pre>';
@@ -15,78 +42,134 @@ function mt_print( $var, $label = null )
 	
 	echo '</pre>';
 }
+endif;
 
 
-
-//----------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------  -----
-
-abstract class MTType
-{
-	const None = -1;
-	const FilteredArchive = 0;
-	const CombinedArchive = 1;
-	const FilteredSearch = 2;
-	const CombinedSearch = 3;
-}
-
-//----------------------------------------------------------------------------------------
-
+/**
+ * Determines if the type of the parameter or global $mt_page_type is an archive type.
+ * @param  MTType|null  $mt_type  The type to compare, or null if the global $mt_page_type is used.
+ * @return  bool  True if the type is an archive type.
+ */
+if( !function_exists('mt_is_archive') ):
 function mt_is_archive( $mt_type = null )
 {
-	if( $mt_type == null ) $mt_type = MultiTaxonomyBrowser::$page_type;
+	global $mt_page_type;
+	if( $mt_type == null ) $mt_type = $mt_page_type;
 	return ( ($mt_type == MTType::FilteredArchive) || ($mt_type == MTType::CombinedArchive) );
 }
+endif;
 
+
+/**
+ * Determines if the type of the parameter or global $mt_page_type is a search type.
+ * @param  MTType|null  $mt_type  The type to compare, or null if the global $mt_page_type is used.
+ * @return  bool  True if the type is a search type.
+ */
+if( !function_exists('mt_is_search') ):
 function mt_is_search( $mt_type = null )
 {
-	if( $mt_type == null ) $mt_type = MultiTaxonomyBrowser::$page_type;
+	global $mt_page_type;
+	if( $mt_type == null ) $mt_type = $mt_page_type;
 	return ( ($mt_type == MTType::FilteredSearch) || ($mt_type == MTType::CombinedSearch) );
 }
+endif;
 
+
+/**
+ * Determines if the type of the parameter or global $mt_page_type is a filtered type.
+ * @param  MTType|null  $mt_type  The type to compare, or null if the global $mt_page_type is used.
+ * @return  bool  True if the type is a filtered type.
+ */
+if( !function_exists('mt_is_filtered') ):
 function mt_is_filtered( $mt_type = null )
 {
-	if( $mt_type == null ) $mt_type = MultiTaxonomyBrowser::$page_type;
+	global $mt_page_type;
+	if( $mt_type == null ) $mt_type = $mt_page_type;
 	return ( ($mt_type == MTType::FilteredArchive) || ($mt_type == MTType::FilteredSearch) );
 }
+endif;
 
+
+/**
+ * Determines if the type of the parameter or global $mt_page_type is a combined type.
+ * @param  MTType|null  $mt_type  The type to compare, or null if the global $mt_page_type is used.
+ * @return  bool  True if the type is a combined type.
+ */
+if( !function_exists('mt_is_combined') ):
 function mt_is_combined( $mt_type = null )
 {
-	if( $mt_type == null ) $mt_type = MultiTaxonomyBrowser::$page_type;
+	global $mt_page_type;
+	if( $mt_type == null ) $mt_type = $mt_page_type;
 	return ( ($mt_type == MTType::CombinedArchive) || ($mt_type == MTType::CombinedSearch) );
 }
+endif;
 
+
+/**
+ * Determines if the type of the parameter or global $mt_page_type is a filtered archive type.
+ * @param  MTType|null  $mt_type  The type to compare, or null if the global $mt_page_type is used.
+ * @return  bool  True if the type is a filtered archive type.
+ */
+if( !function_exists('mt_is_filtered_archive') ):
 function mt_is_filtered_archive( $mt_type = null )
 {
-	if( $mt_type == null ) $mt_type = MultiTaxonomyBrowser::$page_type;
+	global $mt_page_type;
+	if( $mt_type == null ) $mt_type = $mt_page_type;
 	return $mt_type == MTType::FilteredArchive;
 }
+endif;
 
+
+/**
+ * Determines if the type of the parameter or global $mt_page_type is a combined archive type.
+ * @param  MTType|null  $mt_type  The type to compare, or null if the global $mt_page_type is used.
+ * @return  bool  True if the type is a combined archive type.
+ */
+if( !function_exists('mt_is_combined_archive') ):
 function mt_is_combined_archive( $mt_type = null )
 {
-	if( $mt_type == null ) $mt_type = MultiTaxonomyBrowser::$page_type;
+	global $mt_page_type;
+	if( $mt_type == null ) $mt_type = $mt_page_type;
 	return $mt_type == MTType::CombinedArchive;
 }
+endif;
 
+
+/**
+ * Determines if the type of the parameter or global $mt_page_type is a filtered search type.
+ * @param  MTType|null  $mt_type  The type to compare, or null if the global $mt_page_type is used.
+ * @return  bool  True if the type is a filtered search type.
+ */
+if( !function_exists('mt_is_filtered_search') ):
 function mt_is_filtered_search( $mt_type = null )
 {
-	if( $mt_type == null ) $mt_type = MultiTaxonomyBrowser::$page_type;
+	global $mt_page_type;
+	if( $mt_type == null ) $mt_type = $mt_page_type;
 	return $mt_type == MTType::FilteredSearch;
 }
+endif;
 
+
+/**
+ * Determines if the type of the parameter or global $mt_page_type is a combined search type.
+ * @param  MTType|null  $mt_type  The type to compare, or null if the global $mt_page_type is used.
+ * @return  bool  True if the type is a combined search type.
+ */
+if( !function_exists('mt_is_combined_search') ):
 function mt_is_combined_search( $mt_type = null )
 {
-	if( $mt_type == null ) $mt_type = MultiTaxonomyBrowser::$page_type;
+	global $mt_page_type;
+	if( $mt_type == null ) $mt_type = $mt_page_type;
 	return $mt_type == MTType::CombinedSearch;
 }
+endif;
 
-
-
-//----------------------------------------------------------------------------------------
 
 /**
  * Get currently filtered taxonomies and post types.
- **/
+ * @return  Array  The filtered taxonomies and post types.
+ */
+if( !function_exists('mt_get_current_filter_data') ):
 function mt_get_current_filter_data()
 {
 		$data = array(
@@ -96,7 +179,6 @@ function mt_get_current_filter_data()
 		
 		if( (!is_archive() && !mt_is_archive()) && (!is_search() && !mt_is_search()) ) return $data;
 		
-		//------------------------------------------
 		
 		$qo = get_queried_object();
 		if( $qo != null )
@@ -107,7 +189,6 @@ function mt_get_current_filter_data()
 			}
 		}
 		
-		//------------------------------------------
 		
 		if( mt_is_archive() || mt_is_search() )
 		{
@@ -132,27 +213,30 @@ function mt_get_current_filter_data()
 			$terms = array_unique($terms);
 		}
 		
-		//------------------------------------------
 		
 		return $data;
 }
+endif;
 
-
-
-//----------------------------------------------------------------------------------------
 
 /**
- * 
- **/
+ * Print the Multi-Taxonomy Browser related terms filtering interface.
+ * @param  MTType  $mt_type  The type of interface to create (combined or filtered)
+ * @param  Array  $post_types  The post types that can be filtered.
+ * @param  Array  $taxonomies  The taxonomies that can be filtered.
+ * @param  int  $related_level  The level of ralated terms that should be filtered by.
+ *                              0 - Only include related that match posts.
+ *                              1 - Only include posts from one level down (children of taxonomies).
+ *                              2 - Match all children posts
+ * @param  Array  $current  The currently filtered post types and taxonomy terms.
+ */
+if( !function_exists('mt_print_interface') ):
 function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level, $current )
 {
 	$relation = 'AND'; if( mt_is_combined($mt_type) ) $relation = 'OR';
 	
 	
-	// 
 	// Get matching posts.
-	//
-	
 	$query_args = array( 'posts_per_page' => -1 );
 	
 	if( count($post_types) > 0  )
@@ -160,21 +244,11 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 		$query_args['post_type'] = $post_types;
 	}
 	
-	//
-	// Three options:
-	// 0 - Only include related that match posts.
-	// 1 - Only include posts from one level down (children of taxonomies).
-	// 2 - Match all children posts
-	//
-	
+	// Generate the tax_query for the WP_Query.
 	$query_args['tax_query'] = mt_get_tax_query( $current['taxonomies'], $relation, $related_level );
-// 	mt_print( $query_args['tax_query'] );
 	
 	
-	// 
 	// Get matching taxonomies from posts.
-	//
-	
 	$matching_taxonomies = array();
 	foreach( $taxonomies as $taxonomy )
 	{
@@ -198,10 +272,8 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 	
 	wp_reset_query();
 	
-	// 
-	// Sort taxonomy lists.
-	//
 
+	// Sort taxonomy lists.
 	ksort( $matching_taxonomies );
 	foreach( $matching_taxonomies as $taxname => &$terms )
 	{
@@ -216,10 +288,8 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 		asort( $terms );
 	}	
 	
-	// 
+
 	// Get taxonomy labels.
-	//
-	
 	$labels = array();
 	foreach( $taxonomies as $taxname )
 	{
@@ -247,10 +317,7 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 	}
 	
 	
-	// 
 	// Display current taxonomies.
-	//
-
 	echo '<div class="current-taxonomies">';
 		
 	foreach( $taxonomies as $taxname )
@@ -292,10 +359,7 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 	echo '</div>';
 	
 	
-	// 
 	// Display related taxonomies.
-	//
-
 	echo '<div class="related-taxonomies">';
 	
 	foreach( $taxonomies as $taxname )
@@ -337,14 +401,24 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 	
 	echo '</div>';
 }
+endif;
 
-
-
-//----------------------------------------------------------------------------------------
 
 /**
  * 
- **/
+ * @param  MTType  $mt_type  The type of interface to create (combined or filtered)
+ * @param  Array  $post_types  The post types that can be filtered.
+ * @param  Array  $taxonomies  The taxonomies that can be filtered.
+ * @param  int  $related_level  The level of ralated terms that should be filtered by.
+ *                              0 - Only include related that match posts.
+ *                              1 - Only include posts from one level down (children of taxonomies).
+ *                              2 - Match all children posts
+ * @param  Array  $current_taxonomies  The currently filtered taxonomy terms.
+ * @param  Array|null  $new_taxonomies  
+ * @param  bool  $remove_new_taxonomies  
+ * @return  string  
+ */
+if( !function_exists('mt_get_url') ):
 function mt_get_url( $mt_type, $post_types, $taxonomies, $related_level,
                                $current_taxonomies, $new_taxonomies = null, 
                                $remove_new_taxonomies = false )
@@ -398,14 +472,17 @@ function mt_get_url( $mt_type, $post_types, $taxonomies, $related_level,
 	
 	return $url;
 }
+endif;
 
-
-
-//----------------------------------------------------------------------------------------
 
 /**
  * 
- **/
+ * @param  
+ * @param  
+ * @param  
+ * @param  
+ */
+if( !function_exists('mt_create_interface') ):
 function mt_create_interface( $mt_type, $post_types, $taxonomies, $related_level )
 {
 	$current_filtered_data = mt_get_current_filter_data();
@@ -422,13 +499,21 @@ function mt_create_interface( $mt_type, $post_types, $taxonomies, $related_level
 	
 	mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level, $current_filtered_data );
 }
+endif;
 
 
-
+/**
+ * 
+ * @param  
+ * @param  
+ * @param  
+ * @return  
+ */
+if( !function_exists('mt_get_tax_query') ):
 function mt_get_tax_query( $taxonomies, $relation, $related_level = 2 )
 {
-// 	mt_print( $taxonomies, $relation.' : '.$related_level );	
 	if( count($taxonomies) === 0 ) return null;
+	
 	
 	$query_taxonomies = array();
 	foreach( $taxonomies as $taxname => $terms )
@@ -470,10 +555,9 @@ function mt_get_tax_query( $taxonomies, $relation, $related_level = 2 )
 		}
 	}
 	
-// 	mt_print($query_taxonomies);
-// 	mt_print(count($query_taxonomies));
-	
+
 	if( count($query_taxonomies) === 0 ) return null;
+	
 	
 	$count = 0;
 	$tax_query = array();
@@ -520,43 +604,8 @@ function mt_get_tax_query( $taxonomies, $relation, $related_level = 2 )
 		$tax_query['relation'] = $relation;
 	}
 	
-// 	mt_print( $tax_query );	
+
 	return $tax_query;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+endif;
 

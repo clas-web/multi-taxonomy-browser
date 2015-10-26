@@ -1,19 +1,49 @@
 <?php
-
-
+/**
+ * 
+ * 
+ * @package    multi-taxonomy-browser
+ * @author     Crystal Barton <atrus1701@gmail.com>
+ */
+if( !class_exists('MultiTaxonomyBrowser_Api') ):
 class MultiTaxonomyBrowser_Api
 {
+	/**
+	 * 
+	 * @var  bool
+	 */
 	private static $initialized = false;
+
+	/**
+	 * 
+	 * @var  
+	 */
 	private static $post_type;
+
+	/**
+	 * 
+	 * @var  
+	 */
 	private static $taxonomies;
+
+	/**
+	 * 
+	 * @var  
+	 */
 	private static $relation;
+
+	/**
+	 * 
+	 * @var  bool
+	 */
 	private static $search = false;
 	
 	
+	/**
+	 * 
+	 */
 	public static function Init()
 	{
-// 		echo 'Init';
-		
 		if( self::$initialized ) return;
 		
 		self::$post_type = array( 'post' );
@@ -23,50 +53,55 @@ class MultiTaxonomyBrowser_Api
 	}
 	
 	
+	/**
+	 * 
+	 */
 	public static function ProcessCombinedArchive()
 	{
-// 		echo 'ProcessCombinedArchive';
-		
 		self::$relation = 'OR';
 		self::$search = false;
 		self::Process();
 	}
 	
 	
+	/**
+	 * 
+	 */
 	public static function ProcessFilteredArchive()
 	{
-// 		echo 'ProcessFilteredArchive';
-		
 		self::$relation = 'AND';
 		self::$search = false;
 		self::Process();
 	}
 	
 	
+	/**
+	 * 
+	 */
 	public static function ProcessCombinedSearch()
 	{
-// 		echo 'ProcessCombinedSearch';
-		
 		self::$relation = 'OR';
 		self::$search = true;
 		self::Process();
 	}
 	
 	
+	/**
+	 * 
+	 */
 	public static function ProcessFilteredSearch()
 	{
-// 		echo 'ProcessFilteredSearch';
-		
 		self::$relation = 'AND';
 		self::$search = true;
 		self::Process();
 	}
 	
 	
+	/**
+	 * 
+	 */
 	private static function Process()
 	{
-// 		echo 'Process';
-		
 		if( !isset($_GET) ) return;
 		if( !self::$initialized ) self::Init();	
 		
@@ -83,7 +118,6 @@ class MultiTaxonomyBrowser_Api
 					break;
 				
 				default:
-// 					self::AddTaxonomy( $key, self::$relation, explode(MT_DELIMITER, $value) );
 					if( !taxonomy_exists($key) ) break;
 					if( trim($value) == '' ) { self::$taxonomies[$key] = array(); break; }
 					self::$taxonomies[$key] = explode(MT_DELIMITER, $value);
@@ -93,10 +127,14 @@ class MultiTaxonomyBrowser_Api
 	}
 		
 	
+	/**
+	 * 
+	 * @param  
+	 * @param  
+	 * @param  
+	 */
 	private static function AddTaxonomy( $taxonomy, $relation, $terms )
 	{
-// 		echo 'AddTaxonomy';
-		
 		if( !taxonomy_exists($taxonomy) ) return;
 		self::$taxonomies[$taxonomy] = array(
 			'taxonomy' => $taxonomy,
@@ -106,6 +144,11 @@ class MultiTaxonomyBrowser_Api
 	}
 	
 	
+	/**
+	 * 
+	 * @param  
+	 * @return  
+	 */
 	public static function alter_wp_query( $query )
 	{
 		if( is_admin() ) return $query;
@@ -115,8 +158,6 @@ class MultiTaxonomyBrowser_Api
 		$query->query_vars['post_type'] = self::$post_type;
 		$query->query_vars['tax_query'] = mt_get_tax_query( self::$taxonomies, self::$relation, 2 );
 			
-// 		mt_print($query->query_vars['tax_query'], 'Tax_Query');
-		
 		if( self::$search )
 		{
 			$query->is_search = true;
@@ -127,16 +168,20 @@ class MultiTaxonomyBrowser_Api
 			$query->is_home = false;
 		}
 		
-//		mt_print( $query, 'Query' );
-
 		return $query;
 	}
 	
 	
+	/**
+	 * 
+	 * @param  
+	 * @param  
+	 * @param  
+	 * @param  
+	 * @return  
+	 */
 	public static function create_url( $relation, $post_type = null, $taxonomy = null, $use_current = false )
 	{
-// 		echo 'create_url';
-
 		if( !self::$initialized ) self::Init();
 		
 		global $wp;
@@ -144,10 +189,7 @@ class MultiTaxonomyBrowser_Api
 		$url_parts = array();
 		
 		
-		//
 		// MultiTag Query Var
-		//
-		
 		switch( $relation )
 		{
 			case 'OR': array_push( $url_parts, MT_COMBINED_ARCHIVE ); break;
@@ -155,10 +197,7 @@ class MultiTaxonomyBrowser_Api
 		}
 		
 		
-		//
 		// Post Type
-		//
-		
 		if( $use_current )
 		{
 			if( $post_type !== null )
@@ -173,10 +212,7 @@ class MultiTaxonomyBrowser_Api
 		}
 		
 		
-		//
 		// Taxonomies
-		//
-		
 		$tax_name = '';
 		if( $taxonomy === null ) 
 		{
@@ -188,7 +224,6 @@ class MultiTaxonomyBrowser_Api
 			$is_new_taxonomy = true;
 			foreach( self::$taxonomies as $t )
 			{
-				// check if taxonomy already exists.
 				$create_new = true;
 				foreach( $taxonomy as $k => $v )
 				{
@@ -212,23 +247,28 @@ class MultiTaxonomyBrowser_Api
 		}
 		
 		
-// 		echo '<pre>';
-// 		print_r( 'URL: [[['.$current_url.'/?'.implode('&', $url_parts) . ']]]' );
-// 		echo '</pre>';
-		
-		
 		return $current_url.'/?'.implode('&', $url_parts);
 	}
 	
+
+	/**
+	 * 
+	 * @return  
+	 */
 	public static function GetPostTypes()
 	{
 		return self::$post_type;
 	}
 	
+
+	/**
+	 * 
+	 * @return  
+	 */
 	public static function GetTaxonomies()
 	{
 		return self::$taxonomies;
 	}
-	
 }
+endif;
 
