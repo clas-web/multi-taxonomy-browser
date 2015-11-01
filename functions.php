@@ -228,10 +228,12 @@ endif;
  *                              0 - Only include related that match posts.
  *                              1 - Only include posts from one level down (children of taxonomies).
  *                              2 - Match all children posts
+ * @param  String  $sort  The method to use when sorting the terms.
+ * @param  Int  $max_terms  The maximum number of terms to include for each taxonomy.
  * @param  Array  $current  The currently filtered post types and taxonomy terms.
  */
 if( !function_exists('mt_print_interface') ):
-function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level, $current )
+function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level, $sort, $max_terms, $current )
 {
 	$relation = 'AND'; if( mt_is_combined($mt_type) ) $relation = 'OR';
 	
@@ -274,19 +276,71 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 	
 
 	// Sort taxonomy lists.
-	ksort( $matching_taxonomies );
-	foreach( $matching_taxonomies as $taxname => &$terms )
-	{
-		$terms = array_unique( $terms, SORT_STRING );
-		$terms = array_diff( $terms, $current['taxonomies'][$taxname] );
-		asort( $terms );
-	}
-	
 	ksort( $current['taxonomies'] );
 	foreach( $current['taxonomies'] as $taxname => &$terms )
 	{
 		asort( $terms );
-	}	
+	}
+
+	ksort( $matching_taxonomies );
+	foreach( $matching_taxonomies as $taxname => &$terms )
+	{
+		switch( $sort )
+		{
+			case 'name-reverse':
+				usort( $terms,
+					function( $a, $b )
+					{
+						if( $b->name > $a->name )
+							return 1;
+						return -1;
+					});
+				break;
+
+			case 'count':
+				usort( $terms,
+					function( $a, $b )
+					{
+						if( $b->count > $a->count )
+							return 1;
+						return -1;
+					});
+				break;
+
+			case 'count-reverse':
+				usort( $terms,
+					function( $a, $b )
+					{
+						if( $b->count > $a->count )
+							return -1;
+						return 1;
+					});
+				break;
+
+			case 'name':
+			default:
+				usort( $terms,
+					function( $a, $b )
+					{
+						if( $b->name > $a->name )
+							return -1;
+						return 1;
+					});
+				break;
+		}
+
+		$terms = array_map(
+			function($a)
+			{
+				return $a->slug;
+			},
+			$terms
+		);
+
+		$terms = array_unique( $terms );
+		$terms = array_diff( $terms, $current['taxonomies'][$taxname] );
+		asort( $terms );
+	}
 	
 
 	// Get taxonomy labels.
