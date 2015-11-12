@@ -516,7 +516,7 @@ function mt_create_interface( $mt_type, $post_types, $taxonomies, $related_level
 		}
 	}	
 	
-	mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level, $current_filtered_data );
+	mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level, 'name', -1, $current_filtered_data );
 }
 endif;
 
