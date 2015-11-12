@@ -502,7 +502,7 @@ endif;
  * @param  
  */
 if( !function_exists('mt_create_interface') ):
-function mt_create_interface( $mt_type, $post_types, $taxonomies, $related_level )
+function mt_create_interface( $mt_type, $post_types, $taxonomies, $related_level = 0, $sort = 'name', $max_terms = -1 )
 {
 	$current_filtered_data = mt_get_current_filter_data();
 	
@@ -516,7 +516,7 @@ function mt_create_interface( $mt_type, $post_types, $taxonomies, $related_level
 		}
 	}	
 	
-	mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level, 'name', -1, $current_filtered_data );
+	mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level, $sort, $max_terms, $current_filtered_data );
 }
 endif;
 
