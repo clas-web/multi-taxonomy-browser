@@ -265,9 +265,32 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 		
 		foreach( $taxonomies as $taxname )
 		{
+			$args = array(
+				'fields'  => 'slugs',
+				'orderby' => 'name',
+				'order'   => 'ASC',
+			);
+
+			switch( $sort )
+			{
+				case 'name-reverse':
+					$args['order'] = 'DESC';
+					break;
+				case 'count':
+					$args['orderby'] = 'count';
+					break;
+				case 'count-reverse':
+					$args['orderby'] = 'count';
+					$args['order'] = 'DESC';
+					break;
+				case 'name':
+				default:
+					break;
+			}
+
 			$matching_taxonomies[$taxname] = array_merge(
 				$matching_taxonomies[$taxname],
-				wp_get_post_terms( get_the_ID(), $taxname, array("fields" => "slugs") )
+				wp_get_post_terms( get_the_ID(), $taxname, $args )
 			);
 		}
 	}
@@ -275,71 +298,13 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 	wp_reset_query();
 	
 
-	// Sort taxonomy lists.
-	ksort( $current['taxonomies'] );
-	foreach( $current['taxonomies'] as $taxname => &$terms )
-	{
-		asort( $terms );
-	}
-
+	// Only have unique terms in the list.
+	// Diff the current terms out of the matching taxonomies list.
 	ksort( $matching_taxonomies );
 	foreach( $matching_taxonomies as $taxname => &$terms )
 	{
-		switch( $sort )
-		{
-			case 'name-reverse':
-				usort( $terms,
-					function( $a, $b )
-					{
-						if( $b->name > $a->name )
-							return 1;
-						return -1;
-					});
-				break;
-
-			case 'count':
-				usort( $terms,
-					function( $a, $b )
-					{
-						if( $b->count > $a->count )
-							return 1;
-						return -1;
-					});
-				break;
-
-			case 'count-reverse':
-				usort( $terms,
-					function( $a, $b )
-					{
-						if( $b->count > $a->count )
-							return -1;
-						return 1;
-					});
-				break;
-
-			case 'name':
-			default:
-				usort( $terms,
-					function( $a, $b )
-					{
-						if( $b->name > $a->name )
-							return -1;
-						return 1;
-					});
-				break;
-		}
-
-		$terms = array_map(
-			function($a)
-			{
-				return $a->slug;
-			},
-			$terms
-		);
-
 		$terms = array_unique( $terms );
 		$terms = array_diff( $terms, $current['taxonomies'][$taxname] );
-		asort( $terms );
 	}
 	
 
