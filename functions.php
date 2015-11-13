@@ -237,7 +237,6 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 {
 	$relation = 'AND'; if( mt_is_combined($mt_type) ) $relation = 'OR';
 	
-	
 	// Get matching posts.
 	$query_args = array( 'posts_per_page' => -1 );
 	
@@ -249,14 +248,13 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 	// Generate the tax_query for the WP_Query.
 	$query_args['tax_query'] = mt_get_tax_query( $current['taxonomies'], $relation, $related_level );
 	
-	
 	// Get matching taxonomies from posts.
 	$matching_taxonomies = array();
 	foreach( $taxonomies as $taxonomy )
 	{
 		$matching_taxonomies[$taxonomy] = array();
 	}
-	
+
 	$matching_query = new WP_Query( $query_args );
 	
 	while( $matching_query->have_posts() )
@@ -265,48 +263,64 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 		
 		foreach( $taxonomies as $taxname )
 		{
-			$args = array(
-				'fields'  => 'slugs',
-				'orderby' => 'name',
-				'order'   => 'ASC',
-			);
-
-			switch( $sort )
-			{
-				case 'name-reverse':
-					$args['order'] = 'DESC';
-					break;
-				case 'count':
-					$args['orderby'] = 'count';
-					break;
-				case 'count-reverse':
-					$args['orderby'] = 'count';
-					$args['order'] = 'DESC';
-					break;
-				case 'name':
-				default:
-					break;
-			}
-
 			$matching_taxonomies[$taxname] = array_merge(
 				$matching_taxonomies[$taxname],
-				wp_get_post_terms( get_the_ID(), $taxname, $args )
+				wp_get_post_terms( get_the_ID(), $taxname, array( 'fields' => 'slugs' ) )
 			);
 		}
 	}
 	
 	wp_reset_query();
-	
 
-	// Only have unique terms in the list.
-	// Diff the current terms out of the matching taxonomies list.
-	ksort( $matching_taxonomies );
 	foreach( $matching_taxonomies as $taxname => &$terms )
 	{
 		$terms = array_unique( $terms );
 		$terms = array_diff( $terms, $current['taxonomies'][$taxname] );
+
+		// Change terms to term objects for sorting.
+		foreach( $terms as &$term )
+		{
+			$term = get_term_by( 'slug', $term, $taxname );
+		}
+
+		// Sort taxonomies.
+		switch( $sort )
+		{
+			case 'name-reverse':
+				usort( $terms,
+					function( $a, $b )
+					{
+						return ( strcasecmp($a->name, $b->name) * -1 );
+					});
+				break;
+
+			case 'count':
+				usort( $terms,
+					function( $a, $b )
+					{
+						return ( $a->count - $b->count );
+					});
+				break;
+			
+			case 'count-reverse':
+				usort( $terms,
+					function( $a, $b )
+					{
+						return ( $b->count - $a->count );
+					});
+				break;
+
+			case 'name':
+			default:
+				usort( $terms,
+					function( $a, $b )
+					{
+						return ( strcasecmp($a->name, $b->name) );
+					});
+				break;
+		}
 	}
-	
+
 
 	// Get taxonomy labels.
 	$labels = array();
@@ -335,10 +349,11 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 		}
 	}
 	
+	sort($taxonomies);
 	
 	// Display current taxonomies.
 	echo '<div class="current-taxonomies">';
-		
+	
 	foreach( $taxonomies as $taxname )
 	{
 		$class = 'results';
