@@ -407,6 +407,7 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 		
 		if( count($matching_taxonomies[$taxname]) > 0 )
 		{
+			$count = 0;
 
 			foreach( $matching_taxonomies[$taxname] as $term )
 			{
@@ -421,6 +422,9 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 				);
 				
 				echo '<a href="'.$link.'" class='.$term->slug.'>'.$term->name.'</a>';
+
+				$count++;
+				if( $max_terms !== -1 && $count > $max_terms ) break;
 			}
 			
 		}
