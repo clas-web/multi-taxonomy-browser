@@ -373,11 +373,11 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 					$taxonomies,
 					$related_level,
 					$current['taxonomies'],
-					array( $taxname => array( $term ) ),
+					array( $taxname => array( $term->slug ) ),
 					true
 				);
 				
-				$t = get_term_by( 'slug', $term, $taxname ); 
+				$t = get_term_by( 'slug', $term, $taxname );
 				echo '<a href="'.$link.'" class='.$t->slug.'>'.$t->name.'</a>';
 			}
 			
@@ -416,12 +416,11 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 					$taxonomies,
 					$related_level,
 					$current['taxonomies'],
-					array( $taxname => array( $term ) ),
+					array( $taxname => array( $term->slug ) ),
 					false
 				);
 				
-				$t = get_term_by( 'slug', $term, $taxname ); 
-				echo '<a href="'.$link.'" class='.$t->slug.'>'.$t->name.'</a>';
+				echo '<a href="'.$link.'" class='.$term->slug.'>'.$term->name.'</a>';
 			}
 			
 		}
