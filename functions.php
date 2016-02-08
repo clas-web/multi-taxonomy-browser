@@ -367,13 +367,18 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 		{
 			foreach( $current['taxonomies'][$taxname] as $term )
 			{
+				$current_taxonomies = $current['taxonomies'];
+				if( array_key_exists( $taxname, $current_taxonomies ) && in_array( $term, $current_taxonomies[ $taxname ] ) )
+				{
+					$current_taxonomies[ $taxname ] = array_diff( $current_taxonomies[ $taxname ], array( $term ) );
+				}
 				$link = mt_get_url(
 					$mt_type,
 					$post_types,
 					$taxonomies,
 					$related_level,
-					$current['taxonomies'],
-					array( $taxname => array( $term->slug ) ),
+					$current_taxonomies,
+					array(),
 					true
 				);
 				
