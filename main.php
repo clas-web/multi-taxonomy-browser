@@ -3,7 +3,7 @@
 Plugin Name: Multi-Taxonomy Browser
 Plugin URI: https://github.com/clas-web/multi-taxonomy-browser
 Description: 
-Version: 1.2.0
+Version: 1.3.0
 Author: Crystal Barton
 Author URI: http://www.crystalbarton.com
 */
@@ -38,7 +38,7 @@ define( 'MT_PLUGIN_NAME', 'Multi-Taxonomy Browser' );
  * 
  * @var  string
  */
-define( 'MT_PLUGIN_VERSION', '1.0' );
+define( 'MT_PLUGIN_VERSION', '1.3.0' );
 
 /**
  * 
@@ -96,7 +96,6 @@ MultiTaxFilter_WidgetShortcodeControl::register_shortcode();
 
 add_filter( 'query_vars', 'mt_query_vars' );
 add_action( 'parse_request', 'mt_parse_request' );
-
 add_filter( 'the_content', 'mt_process_content' );
 
 foreach( array('archive','taxonomy','category','tag') as $archive )
