@@ -176,57 +176,52 @@ class MultiTaxFilter_WidgetShortcodeControl extends WidgetShortcodeControl
 	public function print_control( $options, $args = null )
 	{
 		extract( $options );
-		
-		
 		$current_filtered_data = mt_get_current_filter_data();
-		$display_filter_widget = true;
 		
-		
-		if( mt_is_archive() || mt_is_search() )
-		{
-			if( count($post_types) != count($current_filtered_data['post_types']) )
-				$display_filter_widget = false;
-			if( count($taxonomies) != count($current_filtered_data['taxonomies']) )
-				$display_filter_widget = false;
-			
-			if( $display_filter_widget )
-			{
-				foreach( $post_types as $pt )
-				{
-					if( !in_array($pt, $current_filtered_data['post_types']) )
-					{
-						$display_filter_widget = false; break;
-					}
-				}
-			}
-			
-			if( $display_filter_widget )
-			{
-				foreach( $taxonomies as $tx )
-				{
-					if( !array_key_exists($tx, $current_filtered_data['taxonomies']) )
-					{
-						$display_filter_widget = false; break;
-					}
-				}
-			}
-		}
-		else
-		{
-			$display_filter_widget = false;
-			
-			foreach( $taxonomies as $tx )
-			{
-				if( array_key_exists($tx, $current_filtered_data['taxonomies']) )
-				{
-					$display_filter_widget = true; break;
-				}
-			}
-		}
-		
+// 		$display_filter_widget = true;
+// 		if( mt_is_archive() || mt_is_search() )
+// 		{
+// 			if( count($post_types) != count($current_filtered_data['post_types']) )
+// 				$display_filter_widget = false;
+// 			if( count($taxonomies) != count($current_filtered_data['taxonomies']) )
+// 				$display_filter_widget = false;
+// 			
+// 			if( $display_filter_widget )
+// 			{
+// 				foreach( $post_types as $pt )
+// 				{
+// 					if( !in_array($pt, $current_filtered_data['post_types']) )
+// 					{
+// 						$display_filter_widget = false; break;
+// 					}
+// 				}
+// 			}
+// 			
+// 			if( $display_filter_widget )
+// 			{
+// 				foreach( $taxonomies as $tx )
+// 				{
+// 					if( !array_key_exists($tx, $current_filtered_data['taxonomies']) )
+// 					{
+// 						$display_filter_widget = false; break;
+// 					}
+// 				}
+// 			}
+// 		}
+// 		else
+// 		{
+// 			$display_filter_widget = false;
+// 			
+// 			foreach( $taxonomies as $tx )
+// 			{
+// 				if( array_key_exists($tx, $current_filtered_data['taxonomies']) )
+// 				{
+// 					$display_filter_widget = true; break;
+// 				}
+// 			}
+// 		}
 
-		if( !$display_filter_widget ) return;
-		
+// 		if( !$display_filter_widget ) return;
 		
 		if( !mt_is_archive() && !mt_is_search() )
 		{
@@ -238,18 +233,14 @@ class MultiTaxFilter_WidgetShortcodeControl extends WidgetShortcodeControl
 			}
 		}
 		
-		
 		echo $args['before_widget'];
 		echo '<div id="multi-tax-browser-control-'.self::$index.'" class="wscontrol multi-tax-browser-control">';
 		
-		
-		if( !empty($title) )
-		{
+		if( !empty($title) ) {
 			echo $args['before_title'] . $title . $args['after_title'];
 		}
 		
 		mt_print_interface( MTType::FilteredArchive, $post_types, $taxonomies, $related_level, $sort, $max_terms, $current_filtered_data );
-		
 		
 		echo '</div>';
 		echo $args['after_widget'];
