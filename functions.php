@@ -367,7 +367,7 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 			$class = 'no-results';
 		}
 			
-		$title = apply_filters( 'mt_current_tax_title', 'Current '.$labels[ $taxname ], $taxname );
+		$title = apply_filters( 'mt_current_tax_title', 'Current '.$labels[ $taxname ], $taxname, $labels[ $taxname ] );
 			
 		echo '<div class="' . $taxname . ' ' . $class . '">';
 		echo '<span class="title">' . $title . '</span>';
@@ -416,8 +416,9 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 		$class = 'results';
 		if( count( $matching_taxonomies[ $taxname ] ) == 0 ) {
 			$class = 'no-results';
-
-		$title = apply_filters( 'mt_related_tax_title', 'Related '.$labels[ $taxname ], $taxname );
+		}
+		
+		$title = apply_filters( 'mt_related_tax_title', 'Related '.$labels[ $taxname ], $taxname, $labels[ $taxname ] );
 			
 		echo '<div class="' . $taxname . ' ' . $class . '">';
 		echo '<span class="title">' . $title . '</span>';
