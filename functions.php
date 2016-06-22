@@ -374,12 +374,11 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 	
 		if( count( $current['taxonomies'][ $taxname ] ) > 0 )
 		{
-			foreach( $current['taxonomies'][$taxname] as $term )
+			foreach( $current['taxonomies'][ $taxname ] as $term_slug )
 			{
 				$current_taxonomies = $current['taxonomies'];
-				if( array_key_exists( $taxname, $current_taxonomies ) && in_array( $term, $current_taxonomies[ $taxname ] ) )
-				{
-					$current_taxonomies[ $taxname ] = array_diff( $current_taxonomies[ $taxname ], array( $term ) );
+				if( array_key_exists( $taxname, $current_taxonomies ) && in_array( $term_slug, $current_taxonomies[ $taxname ] ) ) {
+					$current_taxonomies[ $taxname ] = array_diff( $current_taxonomies[ $taxname ], array( $term_slug ) );
 				}
 				
 				$link = mt_get_url(
@@ -426,8 +425,7 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 		if( count( $matching_taxonomies[ $taxname ] ) > 0 )
 		{
 			$count = 0;
-
-			foreach( $matching_taxonomies[$taxname] as $term )
+			foreach( $matching_taxonomies[ $taxname ] as $term_object )
 			{
 				$link = mt_get_url(
 					$mt_type,
@@ -435,11 +433,11 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 					$taxonomies,
 					$related_level,
 					$current['taxonomies'],
-					array( $taxname => array( $term->slug ) ),
+					array( $taxname => array( $term_object->slug ) ),
 					false
 				);
 				
-				echo '<a href="'.$link.'" class='.$term->slug.'>'.$term->name.'</a>';
+				echo '<a href="' . esc_attr( $link ) . '" class=' . esc_attr( $term_object->slug ) . '>' . $term_object->name . '</a>';
 
 				$count++;
 				if( $max_terms !== -1 && $count > $max_terms ) break;
