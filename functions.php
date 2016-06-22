@@ -321,10 +321,15 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 	}
 	
 	
-	// Filter out taxonomies with no terms.
-	$matching_taxonomies = array_filter( $matching_taxonomies, function( $v, $k ) {
-		return ( $v->count > 0 );
-	}, ARRAY_FILTER_USE_BOTH );
+	// Filter out terms with no associated posts.
+	foreach( $matching_taxonomies as $taxname => $terms )
+	{
+		$matching_taxonomies[ $taxname ] = array_filter( $terms, 
+			function( $v ) {
+				return ( $v->count > 0 );
+			}
+		);
+	}
 	
 	
 	// Get taxonomy labels.
