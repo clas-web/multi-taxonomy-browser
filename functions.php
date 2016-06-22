@@ -319,8 +319,14 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 				break;
 		}
 	}
-
-
+	
+	
+	// Filter out taxonomies with no terms.
+	$matching_taxonomies = array_filter( $matching_taxonomies, function( $v, $k ) {
+		return ( $v->count > 0 );
+	}, ARRAY_FILTER_USE_BOTH );
+	
+	
 	// Get taxonomy labels.
 	$labels = array();
 	foreach( $taxonomies as $taxname )
