@@ -278,8 +278,7 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 		$terms = array_diff( $terms, $current['taxonomies'][$taxname] );
 
 		// Change terms to term objects for sorting.
-		foreach( $terms as &$term )
-		{
+		foreach( $terms as &$term ) {
 			$term = get_term_by( 'slug', $term, $taxname );
 		}
 
@@ -290,7 +289,7 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 				usort( $terms,
 					function( $a, $b )
 					{
-						return ( strcasecmp($a->name, $b->name) * -1 );
+						return ( strcasecmp( $a->name, $b->name ) * -1 );
 					});
 				break;
 
@@ -315,7 +314,7 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 				usort( $terms,
 					function( $a, $b )
 					{
-						return ( strcasecmp($a->name, $b->name) );
+						return ( strcasecmp( $a->name, $b->name ) );
 					});
 				break;
 		}
@@ -351,21 +350,23 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 	
 	sort($taxonomies);
 	
+
 	// Display current taxonomies.
 	echo '<div class="current-taxonomies">';
-	
+
 	foreach( $taxonomies as $taxname )
 	{
 		$class = 'results';
-		if( count($current['taxonomies'][$taxname]) == 0 )
+		if( count( $current['taxonomies'][ $taxname ] ) == 0 ) {
 			$class = 'no-results';
+		}
 			
 		$title = apply_filters( 'mt_current_tax_title', 'Current '.$labels[ $taxname ], $taxname );
 			
-		echo '<div class="'.$taxname.' '.$class.'">';
+		echo '<div class="' . $taxname . ' ' . $class . '">';
 		echo '<span class="title">' . $title . '</span>';
 	
-		if( count($current['taxonomies'][$taxname]) > 0 )
+		if( count( $current['taxonomies'][ $taxname ] ) > 0 )
 		{
 			foreach( $current['taxonomies'][$taxname] as $term )
 			{
@@ -374,6 +375,7 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 				{
 					$current_taxonomies[ $taxname ] = array_diff( $current_taxonomies[ $taxname ], array( $term ) );
 				}
+				
 				$link = mt_get_url(
 					$mt_type,
 					$post_types,
@@ -384,8 +386,8 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 					true
 				);
 				
-				$t = get_term_by( 'slug', $term, $taxname );
-				echo '<a href="'.$link.'" class='.$t->slug.'>'.$t->name.'</a>';
+				$t = get_term_by( 'slug', $term_slug, $taxname );
+				echo '<a href="' . esc_attr( $link ) . '" class=' . esc_attr( $t->slug ) . '>' . $t->name . '</a>';
 			}
 		}
 		else
@@ -397,15 +399,16 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 	}
 	
 	echo '</div>';
-	
-	
+
+		
 	// Display related taxonomies.
 	echo '<div class="related-taxonomies">';
 	
+
 	foreach( $taxonomies as $taxname )
 	{
 		$class = 'results';
-		if( count($matching_taxonomies[$taxname]) == 0 )
+		if( count( $matching_taxonomies[ $taxname ] ) == 0 ) {
 			$class = 'no-results';
 
 		$title = apply_filters( 'mt_related_tax_title', 'Related '.$labels[ $taxname ], $taxname );
@@ -413,7 +416,7 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 		echo '<div class="' . $taxname . ' ' . $class . '">';
 		echo '<span class="title">' . $title . '</span>';
 		
-		if( count($matching_taxonomies[$taxname]) > 0 )
+		if( count( $matching_taxonomies[ $taxname ] ) > 0 )
 		{
 			$count = 0;
 
