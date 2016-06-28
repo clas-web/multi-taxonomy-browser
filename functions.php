@@ -322,9 +322,9 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 	
 	
 	// Filter out terms with no associated posts.
-	foreach( $matching_taxonomies as $taxname => $terms )
+	foreach( $matching_taxonomies as $taxname => &$terms )
 	{
-		$matching_taxonomies[ $taxname ] = array_filter( $terms, 
+		$terms = array_filter( $terms, 
 			function( $v ) {
 				return ( $v->count > 0 );
 			}
