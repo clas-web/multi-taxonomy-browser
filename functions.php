@@ -231,9 +231,10 @@ endif;
  * @param  String  $sort  The method to use when sorting the terms.
  * @param  Int  $max_terms  The maximum number of terms to include for each taxonomy.
  * @param  Array  $current  The currently filtered post types and taxonomy terms.
+ * @param  bool  $show_count  True to show the post count for each term, otherwise False.
  */
 if( !function_exists('mt_print_interface') ):
-function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level, $sort, $max_terms, $current )
+function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level, $sort, $max_terms, $current, $show_count = false )
 {
 	$relation = 'AND'; if( mt_is_combined($mt_type) ) $relation = 'OR';
 	
@@ -281,6 +282,7 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 		foreach( $terms as &$term ) {
 			$term = get_term_by( 'slug', $term, $taxname );
 		}
+		unset( $term );
 
 		// Sort taxonomies.
 		switch( $sort )
@@ -319,6 +321,7 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 				break;
 		}
 	}
+	unset( $terms );
 	
 	
 	// Filter out terms with no associated posts.
@@ -329,6 +332,39 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 				return ( $v->count > 0 );
 			}
 		);
+	}
+	unset( $terms );
+	
+	
+	if( $show_count )
+	{
+		foreach( $matching_taxonomies as $taxname => &$terms ) {
+			foreach( $terms as &$term_object ) {
+				$query_args = array( 'posts_per_page' => -1 );
+				if( count($post_types) > 0  ) {
+					$query_args['post_type'] = $post_types;
+				}
+				
+				$modified_taxonomies = $current['taxonomies'];
+				if( ! array_key_exists( $taxname, $modified_taxonomies ) ) {
+					$modified_taxonomies = array( $term_object->slug );
+				} else {
+					$modified_taxonomies[ $taxname ][] = $term_object->slug;
+				}
+	
+				$query_args['tax_query'] = mt_get_tax_query( 
+					$modified_taxonomies, 
+					$relation, 
+					$related_level
+				);
+				
+				$matching_query = new WP_Query( $query_args );
+				$term_object->mtb_count = $matching_query->post_count;
+				wp_reset_query();
+			}
+			unset( $term_object );
+		}
+		unset( $terms );
 	}
 	
 	
@@ -364,7 +400,8 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 
 	// Display current taxonomies.
 	echo '<div class="current-taxonomies">';
-
+	
+	$current_taxonmies_count = 0;
 	foreach( $taxonomies as $taxname )
 	{
 		$class = 'results';
@@ -398,6 +435,7 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 				
 				$t = get_term_by( 'slug', $term_slug, $taxname );
 				echo '<a href="' . esc_attr( $link ) . '" class=' . esc_attr( $t->slug ) . '>' . $t->name . '</a>';
+				$current_taxonmies_count++;
 			}
 		}
 		else
@@ -406,6 +444,12 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 		}
 		
 		echo '</div>';
+	}
+	
+	if( $current_taxonmies_count > 0 ) {
+		echo '<a href="' . 
+			mt_get_clear_url(  $mt_type, $post_types, $taxonomies, $related_level ) . 
+			'" class="clear-filters">Clear Filters</a>';
 	}
 	
 	echo '</div>';
@@ -442,7 +486,14 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 					false
 				);
 				
-				echo '<a href="' . esc_attr( $link ) . '" class=' . esc_attr( $term_object->slug ) . '>' . $term_object->name . '</a>';
+				$html = '<a href="' . esc_attr( $link ) . '" class=' . esc_attr( $term_object->slug ) . '>' . $term_object->name;
+				
+				if( isset( $term_object->mtb_count ) ) {
+					$html .= ' (' . $term_object->mtb_count . ')';
+				}
+				
+				$html .= '</a>';
+				echo $html;
 
 				$count++;
 				if( $max_terms !== -1 && $count > $max_terms ) break;
@@ -554,7 +605,7 @@ function mt_create_interface( $mt_type, $post_types, $taxonomies, $related_level
 		}
 	}	
 	
-	mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level, $sort, $max_terms, $current_filtered_data );
+	mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level, $sort, $max_terms, $current_filtered_data, false );
 }
 endif;
 
@@ -663,6 +714,42 @@ function mt_get_tax_query( $taxonomies, $relation, $related_level = 2 )
 	
 
 	return $tax_query;
+}
+endif;
+
+
+
+if( ! function_exists( 'mt_get_clear_url' ) ):
+function mt_get_clear_url( $mt_type, $post_types, $taxonomies, $related_level )
+{
+	$url = get_home_url().'/?';
+	switch( $mt_type )
+	{
+		case( MTType::FilteredArchive ): $url .= MT_FILTERED_ARCHIVE; break;
+		case( MTType::CombinedArchive ): $url .= MT_COMBINED_ARCHIVE; break;
+		case( MTType::FilteredSearch ): $url .= MT_FILTERED_SEARCH; break;
+		case( MTType::CombinedSearch ): $url .= MT_COMBINED_SEARCH; break;
+	}
+	
+	if( !empty( $post_types ) )
+	{
+		$url .= '&post-type='.implode( ',', $post_types );
+	}
+	
+	foreach( $taxonomies as $taxname )
+	{
+		if( ! array_key_exists( $taxname, $current_taxonomies ) )
+		{
+			$url .= '&'.$taxname.'=';
+		}
+	}
+	
+	if( $related_level > 0 )
+	{
+		$url .= '&rl='.$related_level;
+	}
+	
+	return $url;
 }
 endif;
 

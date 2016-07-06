@@ -45,6 +45,7 @@ class MultiTaxFilter_WidgetShortcodeControl extends WidgetShortcodeControl
 	 */
 	public function print_widget_form( $options )
 	{
+		$options = $this->process_options( $options );
 		$options = $this->merge_options( $options );
 		extract( $options );
 		
@@ -108,6 +109,18 @@ class MultiTaxFilter_WidgetShortcodeControl extends WidgetShortcodeControl
 			<?php endfor; ?>
 		</select>
 		</p>
+
+		<p>
+		<input type="hidden" name="<?php echo $this->get_field_name( 'show_count' ); ?>" value="false" />
+		<input type="checkbox" id="<?php echo $this->get_field_name( 'show_count' ); ?>" name="<?php echo $this->get_field_name( 'show_count' ); ?>" value="true" <?php echo ( $show_count ? 'checked' : '' ); ?> />
+		<label for="<?php echo $this->get_field_id( 'show_count' ); ?>"><?php _e( 'Show Count' ); ?></label>
+		</p>
+
+		<p>
+		<input type="hidden" name="<?php echo $this->get_field_name( 'hide' ); ?>" value="false" />
+		<input type="checkbox" id="<?php echo $this->get_field_name( 'hide' ); ?>" name="<?php echo $this->get_field_name( 'hide' ); ?>" value="true" <?php echo ( $hide ? 'checked' : '' ); ?> />
+		<label for="<?php echo $this->get_field_id( 'hide' ); ?>"><?php _e( 'Hide on Non-Multi-Taxonomy Pages' ); ?></label>
+		</p>
 		
 		<?php
 	}
@@ -141,6 +154,9 @@ class MultiTaxFilter_WidgetShortcodeControl extends WidgetShortcodeControl
 		$defaults['sort'] = 'alpha-desc';
 		$defaults['max_terms'] = -1;
 		
+		$defaults['show_count'] = false;
+		$defaults['hide'] = false;
+		
 		return $defaults;
 	}
 	
@@ -164,6 +180,22 @@ class MultiTaxFilter_WidgetShortcodeControl extends WidgetShortcodeControl
 		$options['max_terms'] = intval( $options['max_terms'] );
 		if( $options['max_terms'] < 0 ) $options['max_terms'] = -1;
 		
+		if( ! is_bool( $options['show_count'] ) ) {
+			if( is_string( $options['show_count'] ) ) {
+				$options['show_count'] = ( $options['show_count'] == 'true' ? true : false );
+			} else {
+				$options['show_count'] = false;
+			}
+		}
+		
+		if( ! is_bool( $options['hide'] ) ) {
+			if( is_string( $options['hide'] ) ) {
+				$options['hide'] = ( $options['hide'] == 'true' ? true : false );
+			} else {
+				$options['hide'] = false;
+			}
+		}
+		
 		return $options;
 	}
 	
@@ -178,50 +210,53 @@ class MultiTaxFilter_WidgetShortcodeControl extends WidgetShortcodeControl
 		extract( $options );
 		$current_filtered_data = mt_get_current_filter_data();
 		
-// 		$display_filter_widget = true;
-// 		if( mt_is_archive() || mt_is_search() )
-// 		{
-// 			if( count($post_types) != count($current_filtered_data['post_types']) )
-// 				$display_filter_widget = false;
-// 			if( count($taxonomies) != count($current_filtered_data['taxonomies']) )
-// 				$display_filter_widget = false;
-// 			
-// 			if( $display_filter_widget )
-// 			{
-// 				foreach( $post_types as $pt )
-// 				{
-// 					if( !in_array($pt, $current_filtered_data['post_types']) )
-// 					{
-// 						$display_filter_widget = false; break;
-// 					}
-// 				}
-// 			}
-// 			
-// 			if( $display_filter_widget )
-// 			{
-// 				foreach( $taxonomies as $tx )
-// 				{
-// 					if( !array_key_exists($tx, $current_filtered_data['taxonomies']) )
-// 					{
-// 						$display_filter_widget = false; break;
-// 					}
-// 				}
-// 			}
-// 		}
-// 		else
-// 		{
-// 			$display_filter_widget = false;
-// 			
-// 			foreach( $taxonomies as $tx )
-// 			{
-// 				if( array_key_exists($tx, $current_filtered_data['taxonomies']) )
-// 				{
-// 					$display_filter_widget = true; break;
-// 				}
-// 			}
-// 		}
+		if( $hide )
+		{
+			$display_filter_widget = true;
+			if( mt_is_archive() || mt_is_search() )
+			{
+				if( count($post_types) != count($current_filtered_data['post_types']) )
+					$display_filter_widget = false;
+				if( count($taxonomies) != count($current_filtered_data['taxonomies']) )
+					$display_filter_widget = false;
+				
+				if( $display_filter_widget )
+				{
+					foreach( $post_types as $pt )
+					{
+						if( !in_array($pt, $current_filtered_data['post_types']) )
+						{
+							$display_filter_widget = false; break;
+						}
+					}
+				}
+				
+				if( $display_filter_widget )
+				{
+					foreach( $taxonomies as $tx )
+					{
+						if( !array_key_exists($tx, $current_filtered_data['taxonomies']) )
+						{
+							$display_filter_widget = false; break;
+						}
+					}
+				}
+			}
+			else
+			{
+				$display_filter_widget = false;
+				
+				foreach( $taxonomies as $tx )
+				{
+					if( array_key_exists($tx, $current_filtered_data['taxonomies']) )
+					{
+						$display_filter_widget = true; break;
+					}
+				}
+			}
 
-// 		if( !$display_filter_widget ) return;
+			if( !$display_filter_widget ) return;
+		}
 		
 		if( !mt_is_archive() && !mt_is_search() )
 		{
@@ -240,7 +275,7 @@ class MultiTaxFilter_WidgetShortcodeControl extends WidgetShortcodeControl
 			echo $args['before_title'] . $title . $args['after_title'];
 		}
 		
-		mt_print_interface( MTType::FilteredArchive, $post_types, $taxonomies, $related_level, $sort, $max_terms, $current_filtered_data );
+		mt_print_interface( MTType::FilteredArchive, $post_types, $taxonomies, $related_level, $sort, $max_terms, $current_filtered_data, $show_count );
 		
 		echo '</div>';
 		echo $args['after_widget'];
