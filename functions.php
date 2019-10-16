@@ -408,7 +408,8 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 		if( count( $current['taxonomies'][ $taxname ] ) == 0 ) {
 			$class = 'no-results';
 		}
-			
+		// TODO: update filtered links with a href title.
+		// TODO: update title with newly calculated filtered results
 		$title = apply_filters( 'mt_current_tax_title', 'Current '.$labels[ $taxname ], $taxname, $labels[ $taxname ] );
 			
 		echo '<div class="' . $taxname . ' ' . $class . '">';
@@ -488,12 +489,18 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 				
 				$html = '<a href="' . esc_attr( $link ) . '" class=' . esc_attr( $term_object->slug ) . '>' . $term_object->name;
 				
+				$term_mtb_count = '';
 				if( isset( $term_object->mtb_count ) ) {
-					$html .= ' (' . $term_object->mtb_count . ')';
+					$term_mtb_count = ' (' . $term_object->mtb_count . ')';
+					$html .= $term_mtb_count;
 				}
 				
 				$html .= '</a>';
-				echo $html;
+				// echo $html;
+				$term_object_updated['link'] = esc_attr( $link );
+				$term_object_updated['slug'] = esc_attr( $term_object->slug );
+				$term_object_updated['name'] = $term_object->name . $term_mtb_count;
+				relppl_print_connection_group_link ( $term_object_updated );
 
 				$count++;
 				if( $max_terms !== -1 && $count > $max_terms ) break;
