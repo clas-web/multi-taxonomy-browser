@@ -435,7 +435,11 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 				);
 				
 				$t = get_term_by( 'slug', $term_slug, $taxname );
-				echo '<a href="' . esc_attr( $link ) . '" class=' . esc_attr( $t->slug ) . '>' . $t->name . '</a>';
+				// echo '<a href="' . esc_attr( $link ) . '" class=' . esc_attr( $t->slug ) . '>' . $t->name . '</a>';
+				$current_taxonomies_updated['link'] = esc_attr( $link );
+				$current_taxonomies_updated['slug'] = esc_attr( $t->slug );
+				$current_taxonomies_updated['name'] = $t->name;
+				relppl_print_connection_group_link ( $current_taxonomies_updated );
 				$current_taxonmies_count++;
 			}
 		}
