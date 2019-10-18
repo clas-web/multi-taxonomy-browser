@@ -439,7 +439,7 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 				$current_taxonomies_updated['link'] = esc_attr( $link );
 				$current_taxonomies_updated['slug'] = esc_attr( $t->slug );
 				$current_taxonomies_updated['name'] = $t->name;
-				relppl_print_connection_group_link ( $current_taxonomies_updated );
+				relppl_print_connection_url ( $current_taxonomies_updated );
 				$current_taxonmies_count++;
 			}
 		}
@@ -504,7 +504,7 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 				$term_object_updated['link'] = esc_attr( $link );
 				$term_object_updated['slug'] = esc_attr( $term_object->slug );
 				$term_object_updated['name'] = $term_object->name . $term_mtb_count;
-				relppl_print_connection_group_link ( $term_object_updated );
+				relppl_print_connection_url ( $term_object_updated );
 
 				$count++;
 				if( $max_terms !== -1 && $count > $max_terms ) break;
