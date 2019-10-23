@@ -491,7 +491,7 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 					false
 				);
 				
-				$html = '<a href="' . esc_attr( $link ) . '" class=' . esc_attr( $term_object->slug ) . '>' . $term_object->name;
+				// $html = '<a href="' . esc_attr( $link ) . '" class=' . esc_attr( $term_object->slug ) . '>' . $term_object->name;
 				
 				$term_mtb_count = '';
 				if( isset( $term_object->mtb_count ) ) {
@@ -499,7 +499,7 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 					$html .= $term_mtb_count;
 				}
 				
-				$html .= '</a>';
+				// $html .= '</a>';
 				// echo $html;
 				$term_object_updated['link'] = esc_attr( $link );
 				$term_object_updated['slug'] = esc_attr( $term_object->slug );
