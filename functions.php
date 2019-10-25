@@ -408,7 +408,7 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 		if( count( $current['taxonomies'][ $taxname ] ) == 0 ) {
 			$class = 'no-results';
 		}
-			
+
 		$title = apply_filters( 'mt_current_tax_title', 'Current '.$labels[ $taxname ], $taxname, $labels[ $taxname ] );
 			
 		echo '<div class="' . $taxname . ' ' . $class . '">';
@@ -434,7 +434,11 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 				);
 				
 				$t = get_term_by( 'slug', $term_slug, $taxname );
-				echo '<a href="' . esc_attr( $link ) . '" class=' . esc_attr( $t->slug ) . '>' . $t->name . '</a>';
+				// echo '<a href="' . esc_attr( $link ) . '" class=' . esc_attr( $t->slug ) . '>' . $t->name . '</a>';
+				$current_taxonomies_updated['link'] = esc_attr( $link );
+				$current_taxonomies_updated['slug'] = esc_attr( $t->slug );
+				$current_taxonomies_updated['name'] = $t->name;
+				relppl_print_connection_url ( $current_taxonomies_updated );
 				$current_taxonmies_count++;
 			}
 		}
@@ -486,14 +490,20 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 					false
 				);
 				
-				$html = '<a href="' . esc_attr( $link ) . '" class=' . esc_attr( $term_object->slug ) . '>' . $term_object->name;
+				// $html = '<a href="' . esc_attr( $link ) . '" class=' . esc_attr( $term_object->slug ) . '>' . $term_object->name;
 				
+				$term_mtb_count = '';
 				if( isset( $term_object->mtb_count ) ) {
-					$html .= ' (' . $term_object->mtb_count . ')';
+					$term_mtb_count = ' (' . $term_object->mtb_count . ')';
+					$html .= $term_mtb_count;
 				}
 				
-				$html .= '</a>';
-				echo $html;
+				// $html .= '</a>';
+				// echo $html;
+				$term_object_updated['link'] = esc_attr( $link );
+				$term_object_updated['slug'] = esc_attr( $term_object->slug );
+				$term_object_updated['name'] = $term_object->name . $term_mtb_count;
+				relppl_print_connection_url ( $term_object_updated );
 
 				$count++;
 				if( $max_terms !== -1 && $count > $max_terms ) break;
