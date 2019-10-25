@@ -408,8 +408,7 @@ function mt_print_interface( $mt_type, $post_types, $taxonomies, $related_level,
 		if( count( $current['taxonomies'][ $taxname ] ) == 0 ) {
 			$class = 'no-results';
 		}
-		// TODO: update filtered links with a href title.
-		// TODO: update title with newly calculated filtered results
+
 		$title = apply_filters( 'mt_current_tax_title', 'Current '.$labels[ $taxname ], $taxname, $labels[ $taxname ] );
 			
 		echo '<div class="' . $taxname . ' ' . $class . '">';
