@@ -748,9 +748,12 @@ function mt_get_clear_url( $mt_type, $post_types, $taxonomies, $related_level )
 	
 	foreach( $taxonomies as $taxname )
 	{
-		if( ! array_key_exists( $taxname, $current_taxonomies ) )
-		{
-			$url .= '&'.$taxname.'=';
+		if (!isset($current_taxonomies) || !is_array($current_taxonomies)) {
+			$current_taxonomies = array();
+		}
+
+		if (!array_key_exists($taxname, $current_taxonomies)) {
+			$url .= '&' . $taxname . '=';
 		}
 	}
 	
