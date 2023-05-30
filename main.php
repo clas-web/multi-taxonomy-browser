@@ -3,8 +3,8 @@
 Plugin Name: Multi-Taxonomy Browser
 Plugin URI: https://github.com/clas-web/multi-taxonomy-browser
 Description: 
-Version: 1.5.2
-Author: Crystal Barton
+Version: 1.5.3
+Author: Crystal Barton & Alex Chapin
 Author URI: http://www.crystalbarton.com
 GitHub Plugin URI: https://github.com/clas-web/multi-taxonomy-browser
 */
